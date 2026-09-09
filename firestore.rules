@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isResourceOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    // User settings collection
+    match /userSettings/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Subjects collection
+    match /subjects/{subjectId} {
+      allow read, update, delete: if isResourceOwner();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Goals collection
+    match /goals/{goalId} {
+      allow read, update, delete: if isResourceOwner();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Study Sessions collection
+    match /studySessions/{sessionId} {
+      allow read, update, delete: if isResourceOwner();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Flashcard Decks collection
+    match /flashcardDecks/{deckId} {
+      allow read, update, delete: if isResourceOwner();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Flashcards collection
+    match /flashcards/{cardId} {
+      allow read, update, delete: if isResourceOwner();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Achievements collection
+    match /achievements/{achievementId} {
+      allow read, update, delete: if isResourceOwner();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Quotes collection (public read, authenticated user bookmarking)
+    match /quotes/{quoteId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+  }
+}

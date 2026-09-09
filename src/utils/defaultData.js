@@ -1,0 +1,217 @@
+/**
+ * Default Seed Data for StudyForge Initial Setup
+ */
+
+export const DEFAULT_SUBJECTS = [
+  { id: 'subj-dsa', name: 'Data Structures & Algorithms', color: '#3B82F6', createdAt: Date.now() - 86400000 * 30 },
+  { id: 'subj-python', name: 'Python', color: '#10B981', createdAt: Date.now() - 86400000 * 30 },
+  { id: 'subj-ml', name: 'Machine Learning', color: '#8B5CF6', createdAt: Date.now() - 86400000 * 25 },
+  { id: 'subj-ai', name: 'Artificial Intelligence', color: '#EC4899', createdAt: Date.now() - 86400000 * 20 },
+  { id: 'subj-sql', name: 'SQL', color: '#F59E0B', createdAt: Date.now() - 86400000 * 20 },
+  { id: 'subj-ds', name: 'Data Science', color: '#06B6D4', createdAt: Date.now() - 86400000 * 15 },
+  { id: 'subj-cn', name: 'Computer Networks', color: '#6366F1', createdAt: Date.now() - 86400000 * 15 },
+  { id: 'subj-os', name: 'Operating Systems', color: '#14B8A6', createdAt: Date.now() - 86400000 * 10 },
+  { id: 'subj-se', name: 'Software Engineering', color: '#64748B', createdAt: Date.now() - 86400000 * 10 },
+];
+
+export const DEFAULT_GOALS = [
+  {
+    id: 'goal-1',
+    title: 'Complete DSA Preparation',
+    description: 'Master Linked Lists, Trees, Graphs, and Dynamic Programming algorithms.',
+    subjectId: 'subj-dsa',
+    type: 'study_hours',
+    targetValue: 40,
+    currentProgress: 28,
+    unit: 'hours',
+    deadline: new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
+    priority: 'high',
+    status: 'active',
+    createdAt: Date.now() - 86400000 * 10,
+  },
+  {
+    id: 'goal-2',
+    title: 'Master Machine Learning Fundamentals',
+    description: 'Complete Supervised Learning, Loss Functions, and Neural Network basics.',
+    subjectId: 'subj-ml',
+    type: 'study_hours',
+    targetValue: 30,
+    currentProgress: 18,
+    unit: 'hours',
+    deadline: new Date(Date.now() + 86400000 * 21).toISOString().split('T')[0],
+    priority: 'medium',
+    status: 'active',
+    createdAt: Date.now() - 86400000 * 8,
+  },
+  {
+    id: 'goal-3',
+    title: 'Finish Python Core Mastery',
+    description: 'Review Decorators, Generators, AsyncIO, and OOP Principles.',
+    subjectId: 'subj-python',
+    type: 'topics',
+    targetValue: 10,
+    currentProgress: 9,
+    unit: 'topics',
+    deadline: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
+    priority: 'high',
+    status: 'active',
+    createdAt: Date.now() - 86400000 * 12,
+  },
+];
+
+export const DEFAULT_DECKS = [
+  {
+    id: 'deck-dsa',
+    title: 'DSA Core Concepts',
+    description: 'Essential interview data structures and algorithmic complexity questions.',
+    subjectId: 'subj-dsa',
+    createdAt: Date.now() - 86400000 * 15,
+  },
+  {
+    id: 'deck-python',
+    title: 'Python Language Mechanics',
+    description: 'Advanced Python idioms, memory management, and built-in functions.',
+    subjectId: 'subj-python',
+    createdAt: Date.now() - 86400000 * 10,
+  },
+  {
+    id: 'deck-ml',
+    title: 'ML & AI Definitions',
+    description: 'Key machine learning terms, metrics, and optimization algorithms.',
+    subjectId: 'subj-ml',
+    createdAt: Date.now() - 86400000 * 5,
+  },
+];
+
+const todayStr = new Date().toISOString().split('T')[0];
+const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+export const DEFAULT_FLASHCARDS = [
+  {
+    id: 'card-1',
+    deckId: 'deck-dsa',
+    subjectId: 'subj-dsa',
+    question: 'What is the time complexity of searching in a Balanced Binary Search Tree (BST)?',
+    answer: 'O(log n) in average and worst cases, because height is maintained at log(n).',
+    tags: ['trees', 'complexity'],
+    easeFactor: 2.5,
+    interval: 1,
+    repetitions: 1,
+    nextReviewDate: todayStr,
+    state: 'learning',
+    createdAt: Date.now() - 86400000 * 5,
+  },
+  {
+    id: 'card-2',
+    deckId: 'deck-dsa',
+    subjectId: 'subj-dsa',
+    question: 'Explain the main difference between a Stack and a Queue.',
+    answer: 'A Stack follows Last-In, First-Out (LIFO), whereas a Queue follows First-In, First-Out (FIFO).',
+    tags: ['linear-ds'],
+    easeFactor: 2.6,
+    interval: 3,
+    repetitions: 2,
+    nextReviewDate: todayStr,
+    state: 'review',
+    createdAt: Date.now() - 86400000 * 7,
+  },
+  {
+    id: 'card-3',
+    deckId: 'deck-python',
+    subjectId: 'subj-python',
+    question: 'What is the difference between list.append(x) and list.extend(iterable)?',
+    answer: 'append() adds its argument as a single element to the end of the list. extend() iterates over its argument adding each element.',
+    tags: ['lists', 'methods'],
+    easeFactor: 2.4,
+    interval: 1,
+    repetitions: 0,
+    nextReviewDate: todayStr,
+    state: 'new',
+    createdAt: Date.now() - 86400000 * 3,
+  },
+  {
+    id: 'card-4',
+    deckId: 'deck-ml',
+    subjectId: 'subj-ml',
+    question: 'What is Overfitting in Machine Learning?',
+    answer: 'When a model learns training data noise and details too well, performing great on training data but poorly on unseen test data.',
+    tags: ['fundamentals', 'validation'],
+    easeFactor: 2.5,
+    interval: 2,
+    repetitions: 1,
+    nextReviewDate: todayStr,
+    state: 'learning',
+    createdAt: Date.now() - 86400000 * 2,
+  },
+];
+
+export const DEFAULT_QUOTES = [
+  {
+    id: 'q-1',
+    text: 'Success is the sum of small efforts, repeated day in and day out.',
+    author: 'Robert Collier',
+    category: 'Consistency',
+    isFavorite: true,
+  },
+  {
+    id: 'q-2',
+    text: 'We are what we repeatedly do. Excellence, then, is not an act, but a habit.',
+    author: 'Aristotle',
+    category: 'Discipline',
+    isFavorite: false,
+  },
+  {
+    id: 'q-3',
+    text: 'It is not that I am so smart, it is just that I stay with problems longer.',
+    author: 'Albert Einstein',
+    category: 'Resilience',
+    isFavorite: true,
+  },
+  {
+    id: 'q-4',
+    text: 'Concentrate all your thoughts upon the work in hand. The sun\'s rays do not burn until brought to a focus.',
+    author: 'Alexander Graham Bell',
+    category: 'Focus',
+    isFavorite: false,
+  },
+  {
+    id: 'q-5',
+    text: 'Live as if you were to die tomorrow. Learn as if you were to live forever.',
+    author: 'Mahatma Gandhi',
+    category: 'Learning',
+    isFavorite: false,
+  },
+  {
+    id: 'q-6',
+    text: 'The difference between ordinary and extraordinary is that little extra.',
+    author: 'Jimmy Johnson',
+    category: 'Success',
+    isFavorite: false,
+  },
+  {
+    id: 'q-7',
+    text: 'Discipline is choosing between what you want now and what you want most.',
+    author: 'Abraham Lincoln',
+    category: 'Discipline',
+    isFavorite: true,
+  },
+  {
+    id: 'q-8',
+    text: 'Small daily improvements over time lead to stunning results.',
+    author: 'Robin Sharma',
+    category: 'Consistency',
+    isFavorite: false,
+  },
+];
+
+export const ALL_ACHIEVEMENTS = [
+  { key: 'streak_3', title: '3-Day Streak', description: 'Complete study sessions for 3 consecutive days.', icon: '🔥' },
+  { key: 'streak_7', title: '7-Day Streak', description: 'Maintain focus for a full 7 consecutive days.', icon: '🔥' },
+  { key: 'streak_30', title: '30-Day Streak', description: 'Unstoppable consistency for 30 consecutive days.', icon: '🏆' },
+  { key: 'sessions_100', title: '100 Focus Sessions', description: 'Successfully finish 100 Pomodoro focus sessions.', icon: '⚡' },
+  { key: 'hours_10', title: '10 Study Hours', description: 'Log a total of 10 hours of focused study time.', icon: '📚' },
+  { key: 'hours_50', title: '50 Study Hours', description: 'Log 50 total hours of technical study.', icon: '🎓' },
+  { key: 'first_goal', title: 'First Goal Completed', description: 'Complete your first study goal milestone.', icon: '🎯' },
+  { key: 'cards_100', title: '100 Cards Reviewed', description: 'Review 100 flashcards using spaced repetition.', icon: '🧠' },
+  { key: 'consistency_7', title: '100% Weekly Consistency', description: 'Meet your study threshold every single day this week.', icon: '🌟' },
+];

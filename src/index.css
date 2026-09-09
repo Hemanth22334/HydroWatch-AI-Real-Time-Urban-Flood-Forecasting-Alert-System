@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+  }
+}
+
+/* Vibrant 4-color animated gradient text & backgrounds for Light Theme */
+.gradient-text-palette {
+  background: linear-gradient(135deg, #4F00BC 0%, #A100B2 35%, #FF3B77 70%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-bg-palette {
+  background: linear-gradient(135deg, #4F00BC 0%, #A100B2 35%, #FF3B77 70%, #FDD116 100%);
+}
+
+.glass-card-palette-light {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px -10px rgba(79, 0, 188, 0.08);
+}
+
+.glass-card-palette-light:hover {
+  border-color: rgba(161, 0, 178, 0.3);
+  box-shadow: 0 12px 35px -5px rgba(161, 0, 178, 0.12);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A100B2;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF3B77;
+}
