@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/HydroWatch-AI-Real-Time-Urban-Flood-Forecasting-Alert-System/static/css/main.f40efe1d.css",
+    "main.css": "/HydroWatch-AI-Real-Time-Urban-Flood-Forecasting-Alert-System/static/css/main.aab946f0.css",
     "main.js": "/HydroWatch-AI-Real-Time-Urban-Flood-Forecasting-Alert-System/static/js/main.af5ca188.js",
     "index.html": "/HydroWatch-AI-Real-Time-Urban-Flood-Forecasting-Alert-System/index.html",
-    "main.f40efe1d.css.map": "/HydroWatch-AI-Real-Time-Urban-Flood-Forecasting-Alert-System/static/css/main.f40efe1d.css.map",
+    "main.aab946f0.css.map": "/HydroWatch-AI-Real-Time-Urban-Flood-Forecasting-Alert-System/static/css/main.aab946f0.css.map",
     "main.af5ca188.js.map": "/HydroWatch-AI-Real-Time-Urban-Flood-Forecasting-Alert-System/static/js/main.af5ca188.js.map"
   },
   "entrypoints": [
-    "static/css/main.f40efe1d.css",
+    "static/css/main.aab946f0.css",
     "static/js/main.af5ca188.js"
   ]
 }
