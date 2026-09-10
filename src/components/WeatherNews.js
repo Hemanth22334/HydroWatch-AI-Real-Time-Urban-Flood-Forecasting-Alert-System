@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Newspaper, BellRing, ExternalLink, MapPin, Search, RefreshCw } from 'lucide-react';
+import { fetchDirectCityNews } from '../utils/mlEngine';
 
 export default function WeatherNews({ currentCity = 'Mumbai' }) {
   const [city, setCity] = useState(currentCity);
@@ -17,16 +18,31 @@ export default function WeatherNews({ currentCity = 'Mumbai' }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://127.0.0.1:5000/fetch-city-news?city=${encodeURIComponent(targetCity)}`);
-      const data = await res.json();
-      if (res.ok && data.status === 'success') {
-        setNewsItems(data.news || []);
-        setCity(data.city);
-      } else {
-        setError('Unable to fetch news bulletins for city');
+      let newsData = null;
+      try {
+        const res = await fetch(`http://127.0.0.1:5000/fetch-city-news?city=${encodeURIComponent(targetCity)}`, {
+          signal: AbortSignal.timeout(2000)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'success') {
+            newsData = data.news;
+            setCity(data.city);
+          }
+        }
+      } catch (e) {
+        // Flask server offline/unreachable on mobile -> Direct fallback
       }
+
+      if (!newsData) {
+        newsData = fetchDirectCityNews(targetCity);
+        setCity(targetCity.charAt(0).toUpperCase() + targetCity.slice(1));
+      }
+
+      setNewsItems(newsData || []);
+
     } catch (err) {
-      setError('Unable to connect to news bulletin server');
+      setError('Unable to fetch news bulletins for city');
     } finally {
       setLoading(false);
     }

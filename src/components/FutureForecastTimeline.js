@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Calendar, Clock, TrendingUp, Search, RefreshCw } from 'lucide-react';
+import { fetchDirectFutureForecast } from '../utils/mlEngine';
 
 export default function FutureForecastTimeline() {
   const [city, setCity] = useState('Mumbai');
@@ -12,16 +13,30 @@ export default function FutureForecastTimeline() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://127.0.0.1:5000/fetch-future-forecast?city=${encodeURIComponent(targetCity)}&hours=24`);
-      const data = await res.json();
-      if (res.ok && data.status === 'success') {
-        setForecast(data.forecast || []);
-        setCity(data.city);
-      } else {
-        setError(data.message || 'Failed to fetch future forecast');
+      let data = null;
+      try {
+        const res = await fetch(`http://127.0.0.1:5000/fetch-future-forecast?city=${encodeURIComponent(targetCity)}&hours=24`, {
+          signal: AbortSignal.timeout(2000)
+        });
+        if (res.ok) {
+          const result = await res.json();
+          if (result.status === 'success') {
+            data = result;
+          }
+        }
+      } catch (e) {
+        // Flask server unreachable on mobile -> Direct Open-Meteo call
       }
+
+      if (!data) {
+        data = await fetchDirectFutureForecast(targetCity, 3.5, 24);
+      }
+
+      setForecast(data.forecast || []);
+      setCity(data.city);
+
     } catch (err) {
-      setError('Unable to connect to future forecast server');
+      setError(err.message || 'Unable to fetch future forecast');
     } finally {
       setLoading(false);
     }

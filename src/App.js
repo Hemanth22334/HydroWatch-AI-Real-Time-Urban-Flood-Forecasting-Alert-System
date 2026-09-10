@@ -10,11 +10,12 @@ import {
   NewsPage,
   HistoryPage
 } from './pages/FeaturePages';
+import { calculateClientFloodRisk } from './utils/mlEngine';
 
 const API_BASE_URL = 'http://127.0.0.1:5000';
 
 export default function App() {
-  const [activePage, setActivePage] = useState('landing'); // 'landing' | 'hub' | 'alerts' | 'weather' | 'analytics' | 'forecast' | 'news' | 'history'
+  const [activePage, setActivePage] = useState('landing');
   const [inputs, setInputs] = useState({
     rainfall: 65,
     river_level: 4.8,
@@ -26,54 +27,66 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [autoPredict, setAutoPredict] = useState(true);
-  const [serverStatus, setServerStatus] = useState('checking');
+  const [serverStatus, setServerStatus] = useState('checking'); // 'online' | 'standalone' | 'checking'
   const [history, setHistory] = useState([]);
 
   // Check health endpoint of Flask REST API
   const checkServerHealth = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/health`);
+      const res = await fetch(`${API_BASE_URL}/health`, { signal: AbortSignal.timeout(2000) });
       if (res.ok) {
         setServerStatus('online');
       } else {
-        setServerStatus('offline');
+        setServerStatus('standalone');
       }
     } catch (err) {
-      setServerStatus('offline');
+      setServerStatus('standalone');
     }
   };
 
-  // Fetch prediction from /predict-flood API
+  // Fetch prediction from /predict-flood API or fallback to Client ML Engine
   const fetchPrediction = useCallback(async (currentInputs) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/predict-flood`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          rainfall: currentInputs.rainfall,
-          river_level: currentInputs.river_level,
-          humidity: currentInputs.humidity
-        })
-      });
+      let data = null;
+      try {
+        const response = await fetch(`${API_BASE_URL}/predict-flood`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rainfall: currentInputs.rainfall,
+            river_level: currentInputs.river_level,
+            humidity: currentInputs.humidity
+          }),
+          signal: AbortSignal.timeout(2000)
+        });
 
-      if (!response.ok) {
-        throw new Error(`Server returned HTTP ${response.status}`);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.status === 'success') {
+            data = result.data;
+            setServerStatus('online');
+          }
+        }
+      } catch (e) {
+        // Flask server offline/unreachable (e.g. on Mobile Phone) -> Fallback to client ML
+        setServerStatus('standalone');
       }
 
-      const result = await response.json();
-      if (result.status === 'success') {
-        setPrediction(result.data);
-        setServerStatus('online');
-        setHistory(prev => [result.data, ...prev.slice(0, 9)]);
-      } else {
-        throw new Error(result.message || 'Failed to predict flood risk');
+      // If Flask backend didn't respond, calculate via Client ML Engine
+      if (!data) {
+        data = calculateClientFloodRisk(currentInputs.rainfall, currentInputs.river_level, currentInputs.humidity);
       }
+
+      setPrediction(data);
+      setHistory(prev => [data, ...prev.slice(0, 9)]);
+
     } catch (err) {
-      console.error('Fetch Prediction Error:', err);
-      setError('Unable to connect to Flask API (http://127.0.0.1:5000/predict-flood). Ensure the Python backend is running.');
-      setServerStatus('offline');
+      console.error('Prediction Error:', err);
+      // Fallback calculation guarantee
+      const clientData = calculateClientFloodRisk(currentInputs.rainfall, currentInputs.river_level, currentInputs.humidity);
+      setPrediction(clientData);
     } finally {
       setLoading(false);
     }

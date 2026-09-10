@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, Sparkles, Server, Home, LayoutDashboard, AlertTriangle, BarChart3, Calendar, Newspaper, History } from 'lucide-react';
+import { ShieldAlert, Sparkles, Server, Home, LayoutDashboard, AlertTriangle, BarChart3, Calendar, Newspaper, History, Globe } from 'lucide-react';
 
 export default function Navbar({ activePage, setActivePage, serverStatus }) {
   const navItems = [
@@ -59,19 +59,26 @@ export default function Navbar({ activePage, setActivePage, serverStatus }) {
             ))}
           </nav>
 
-          {/* Flask Server Status Badge */}
+          {/* Engine Status Badge */}
           <div className="flex items-center space-x-2 bg-slate-50 px-3.5 py-1.5 rounded-2xl border border-slate-200 shadow-xs text-xs font-bold">
-            <Server className="w-3.5 h-3.5 text-palette-pink" />
             {serverStatus === 'online' ? (
-              <span className="inline-flex items-center space-x-1.5 text-emerald-800 font-black">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                <span className="hidden sm:inline">Connected</span>
-              </span>
+              <>
+                <Server className="w-3.5 h-3.5 text-palette-pink" />
+                <span className="inline-flex items-center space-x-1.5 text-emerald-800 font-black">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                  <span className="hidden sm:inline">Flask API (Connected)</span>
+                  <span className="sm:hidden">API</span>
+                </span>
+              </>
             ) : (
-              <span className="inline-flex items-center space-x-1.5 text-rose-900 font-black">
-                <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                <span className="hidden sm:inline">Offline</span>
-              </span>
+              <>
+                <Globe className="w-3.5 h-3.5 text-palette-magenta" />
+                <span className="inline-flex items-center space-x-1.5 text-palette-magenta font-black">
+                  <span className="w-2 h-2 rounded-full bg-palette-pink animate-pulse"></span>
+                  <span className="hidden sm:inline">Cloud Engine (Active)</span>
+                  <span className="sm:hidden">Cloud</span>
+                </span>
+              </>
             )}
           </div>
 

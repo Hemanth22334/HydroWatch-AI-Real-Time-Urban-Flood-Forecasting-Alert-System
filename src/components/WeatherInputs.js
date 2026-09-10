@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CloudRain, Waves, Droplet, RefreshCw, Zap, Search, MapPin, Globe } from 'lucide-react';
+import { fetchDirectCityWeather } from '../utils/mlEngine';
 
 export default function WeatherInputs({ inputs, setInputs, onPredict, autoPredict, setAutoPredict, loading, onCitySelect }) {
   const [cityName, setCityName] = useState('');
@@ -29,7 +30,7 @@ export default function WeatherInputs({ inputs, setInputs, onPredict, autoPredic
     onPredict(presetValues);
   };
 
-  // Fetch live city weather from backend API
+  // Fetch live city weather from backend API with direct client fallback for mobile
   const handleFetchCityWeather = async (e) => {
     e.preventDefault();
     if (!cityName.trim()) return;
@@ -38,35 +39,46 @@ export default function WeatherInputs({ inputs, setInputs, onPredict, autoPredic
     setCityMessage(null);
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/fetch-city-weather?city=${encodeURIComponent(cityName.trim())}`);
-      const result = await response.json();
+      let weatherData = null;
 
-      if (response.ok && result.status === 'success') {
-        const { city, country, rainfall_mm, humidity_pct, temperature_c } = result.data;
-        const newInputs = {
-          ...inputs,
-          rainfall: rainfall_mm,
-          humidity: humidity_pct
-        };
-        setInputs(newInputs);
-        if (onCitySelect) {
-          onCitySelect(city);
+      try {
+        const response = await fetch(`http://127.0.0.1:5000/fetch-city-weather?city=${encodeURIComponent(cityName.trim())}`, {
+          signal: AbortSignal.timeout(2000)
+        });
+        if (response.ok) {
+          const result = await response.json();
+          if (result.status === 'success') {
+            weatherData = result.data;
+          }
         }
-        setCityMessage({
-          type: 'success',
-          text: `Fetched live weather for ${city}${country ? `, ${country}` : ''}: Temp ${temperature_c}°C, Rain ${rainfall_mm} mm/h, Humidity ${humidity_pct}%`
-        });
-        onPredict(newInputs);
-      } else {
-        setCityMessage({
-          type: 'error',
-          text: result.message || 'City not found'
-        });
+      } catch (err) {
+        // Flask server offline/unreachable on mobile -> Direct Open-Meteo Client Call
       }
+
+      if (!weatherData) {
+        weatherData = await fetchDirectCityWeather(cityName.trim());
+      }
+
+      const { city, country, rainfall_mm, humidity_pct, temperature_c } = weatherData;
+      const newInputs = {
+        ...inputs,
+        rainfall: rainfall_mm,
+        humidity: humidity_pct
+      };
+      setInputs(newInputs);
+      if (onCitySelect) {
+        onCitySelect(city);
+      }
+      setCityMessage({
+        type: 'success',
+        text: `Fetched live weather for ${city}${country ? `, ${country}` : ''}: Temp ${temperature_c}°C, Rain ${rainfall_mm} mm/h, Humidity ${humidity_pct}%`
+      });
+      onPredict(newInputs);
+
     } catch (err) {
       setCityMessage({
         type: 'error',
-        text: 'Unable to connect to live weather API service.'
+        text: err.message || 'Unable to fetch city weather.'
       });
     } finally {
       setCityLoading(false);
