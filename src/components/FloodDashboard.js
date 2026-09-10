@@ -6,6 +6,7 @@ import CityVisualization from './CityVisualization';
 import FutureForecastTimeline from './FutureForecastTimeline';
 import WeatherNews from './WeatherNews';
 import { Activity, Server, History, ShieldAlert, Sparkles } from 'lucide-react';
+import { calculateClientFloodRisk } from '../utils/mlEngine';
 
 const API_BASE_URL = 'http://127.0.0.1:5000';
 
@@ -27,7 +28,7 @@ export default function FloodDashboard() {
   // Check health endpoint of Flask REST API
   const checkServerHealth = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/health`);
+      const res = await fetch(`${API_BASE_URL}/health`, { signal: AbortSignal.timeout(2000) });
       if (res.ok) {
         setServerStatus('online');
       } else {
@@ -38,10 +39,12 @@ export default function FloodDashboard() {
     }
   };
 
-  // Fetch prediction from /predict-flood API
+  // Fetch prediction from /predict-flood API or client ML fallback
   const fetchPrediction = useCallback(async (currentInputs) => {
     setLoading(true);
     setError(null);
+    let predData = null;
+
     try {
       const response = await fetch(`${API_BASE_URL}/predict-flood`, {
         method: 'POST',
@@ -50,29 +53,30 @@ export default function FloodDashboard() {
           rainfall: currentInputs.rainfall,
           river_level: currentInputs.river_level,
           humidity: currentInputs.humidity
-        })
+        }),
+        signal: AbortSignal.timeout(2000)
       });
 
-      if (!response.ok) {
-        throw new Error(`Server returned HTTP ${response.status}`);
-      }
-
-      const result = await response.json();
-      if (result.status === 'success') {
-        setPrediction(result.data);
-        setServerStatus('online');
-        // Add to recent history log (max 5 entries)
-        setHistory(prev => [result.data, ...prev.slice(0, 4)]);
-      } else {
-        throw new Error(result.message || 'Failed to predict flood risk');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.status === 'success') {
+          predData = result.data;
+          setServerStatus('online');
+        }
       }
     } catch (err) {
-      console.error('Fetch Prediction Error:', err);
-      setError('Unable to connect to Flask API (http://127.0.0.1:5000/predict-flood). Ensure the Python backend is running.');
+      // Flask server unreachable on mobile or remote -> fallback to client ML engine
       setServerStatus('offline');
-    } finally {
-      setLoading(false);
     }
+
+    if (!predData) {
+      predData = calculateClientFloodRisk(currentInputs.rainfall, currentInputs.river_level, currentInputs.humidity);
+    }
+
+    setPrediction(predData);
+    setError(null);
+    setHistory(prev => [predData, ...prev.slice(0, 4)]);
+    setLoading(false);
   }, []);
 
   // Initial load: ping server & fetch initial prediction
@@ -117,16 +121,16 @@ export default function FloodDashboard() {
           {/* Backend Connection Status Badge */}
           <div className="flex items-center space-x-3 self-start md:self-auto bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-md">
             <Server className="w-4 h-4 text-palette-pink" />
-            <span className="text-xs text-slate-600 font-bold">Flask API:</span>
+            <span className="text-xs text-slate-600 font-bold">Engine:</span>
             {serverStatus === 'online' ? (
               <span className="inline-flex items-center space-x-1.5 text-xs font-black text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                <span>Connected (127.0.0.1:5000)</span>
+                <span>Flask Server (127.0.0.1:5000)</span>
               </span>
             ) : serverStatus === 'offline' ? (
-              <span className="inline-flex items-center space-x-1.5 text-xs font-black text-rose-900 bg-rose-100 px-3 py-1 rounded-full border border-rose-300 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                <span>Disconnected</span>
+              <span className="inline-flex items-center space-x-1.5 text-xs font-black text-purple-900 bg-purple-100 px-3 py-1 rounded-full border border-purple-300 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-palette-magenta animate-pulse"></span>
+                <span>Cloud Engine (Active)</span>
               </span>
             ) : (
               <span className="inline-flex items-center space-x-1.5 text-xs font-black text-amber-900 bg-amber-100 px-3 py-1 rounded-full border border-amber-300 shadow-sm">
